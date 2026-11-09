@@ -23,6 +23,7 @@ function countUp(el, value, render) {
 }
 
 /* ── segmented controls ── */
+const segSync = []; // pills measured while a panel is hidden get width 0 — re-measure on tab switch
 function segment(container, onPick) {
   const pill = container.querySelector(".seg-pill");
   const btns = [...container.querySelectorAll(".seg-btn")];
@@ -30,6 +31,7 @@ function segment(container, onPick) {
     pill.style.width = btn.offsetWidth + "px";
     pill.style.transform = `translateX(${btn.offsetLeft - 3}px)`;
   }
+  const sync = () => move(container.querySelector(".seg-btn.active"));
   btns.forEach((btn) => btn.addEventListener("click", () => {
     btns.forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-selected", "false"); });
     btn.classList.add("active");
@@ -37,13 +39,15 @@ function segment(container, onPick) {
     move(btn);
     onPick(btn);
   }));
-  requestAnimationFrame(() => move(container.querySelector(".seg-btn.active")));
-  addEventListener("resize", () => move(container.querySelector(".seg-btn.active")));
+  requestAnimationFrame(sync);
+  addEventListener("resize", sync);
+  segSync.push(sync);
 }
 
 segment($("main-tabs"), (btn) => {
   document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
   $("tab-" + btn.dataset.tab).classList.add("active");
+  requestAnimationFrame(() => segSync.forEach((fn) => fn()));
   scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 });
 
@@ -142,6 +146,7 @@ function renderFTE() {
   $("fte-winlabel").textContent = diff >= 1 ? "saves " + inr(diff) + " over the other" : "either regime";
   tile($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total);
   tile($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total);
+  markYouRow();
 }
 
 /* ── contractor ── */
@@ -185,20 +190,44 @@ function renderContractor() {
 
 /* ── cheatsheet ── */
 const CS_GROSSES = [1000000, 1200000, 1275000, 1500000, 1800000, 2000000, 2500000, 3000000, 4000000, 5000000, 6000000, 7500000, 10000000, 15000000, 20000000];
-let csDed = 0;
+let csDed = 0, csPer = 1; // csPer: 1 = yearly, 12 = per-month
+
+/* Tint the row nearest the salary chosen on the Salaried tab. */
+function markYouRow() {
+  const rows = [...document.querySelectorAll("#cs-table tbody tr")];
+  if (!rows.length || !fteValue) return;
+  const gross = fteValue.get();
+  const you = rows.reduce((a, b) =>
+    Math.abs(+b.dataset.gross - gross) < Math.abs(+a.dataset.gross - gross) ? b : a);
+  rows.forEach((tr) => tr.classList.toggle("is-you", tr === you));
+}
+
 function renderCheatsheet() {
   const d = { c80: Math.min(csDed, 150000), nps: Math.min(Math.max(csDed - 150000, 0), 50000), d80: Math.min(Math.max(csDed - 200000, 0), 25000), other: Math.max(csDed - 225000, 0) };
-  const head = `<thead><tr><th>Gross</th><th>New: tax</th><th>New: /month</th><th>Old: tax</th><th>Old: /month</th><th>Winner saves</th></tr></thead>`;
-  const rows = CS_GROSSES.map((g) => {
+  const unit = csPer === 12 ? "<em>/mo</em>" : "";
+  const money = (n) => inr(n / csPer);
+  const data = CS_GROSSES.map((g) => {
     const nt = T.newRegimeTax(T.salariedTaxable(g, "new")).total;
     const ot = T.oldRegimeTax(T.salariedTaxable(g, "old", d)).total;
-    const newWins = nt <= ot;
-    return `<tr><td>${inr(g)}</td><td>${inr(nt)}</td><td>${inr((g - nt) / 12)}</td><td>${inr(ot)}</td><td>${inr((g - ot) / 12)}</td>` +
-      `<td><span class="chip ${newWins ? "new" : "old"}">${newWins ? "New" : "Old"} · ${inr(Math.abs(nt - ot))}</span></td></tr>`;
+    return { g, nt, ot, diff: Math.abs(nt - ot) };
+  });
+  const maxDiff = Math.max(...data.map((r) => r.diff)) || 1;
+  const head = `<thead><tr><th>Gross${unit}</th><th>New: tax${unit}</th><th>New: in hand${unit}</th><th>Old: tax${unit}</th><th>Old: in hand${unit}</th><th>Winner saves${unit}</th></tr></thead>`;
+  const rows = data.map(({ g, nt, ot, diff }) => {
+    const tie = diff < 1, newWins = nt <= ot;
+    const cls = tie ? "tie" : newWins ? "new" : "old";
+    const label = tie ? "Either" : newWins ? "New" : "Old";
+    const width = tie ? 0 : Math.max((diff / maxDiff) * 100, 2.5).toFixed(1);
+    return `<tr data-gross="${g}"><td>${money(g)}<span class="you-flag">You</span></td>` +
+      `<td>${money(nt)}</td><td>${money(g - nt)}</td><td>${money(ot)}</td><td>${money(g - ot)}</td>` +
+      `<td class="cs-diff"><span class="chip ${cls}">${label} · ${money(diff)}</span>` +
+      `<span class="cs-bar"><i class="${cls}" style="width:${width}%"></i></span></td></tr>`;
   }).join("");
   $("cs-table").innerHTML = head + "<tbody>" + rows + "</tbody>";
+  markYouRow();
 }
 segment($("cs-seg"), (btn) => { csDed = +btn.dataset.ded; renderCheatsheet(); });
+segment($("cs-period-seg"), (btn) => { csPer = +btn.dataset.per; renderCheatsheet(); });
 segment($("ct-digital-seg"), (btn) => { ctDigital = +btn.dataset.v; renderContractor(); });
 
 /* ── wire up ── */

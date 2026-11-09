@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Indian Tax Calculator FY 2026-27</title>
   <meta name="description" content="Old vs new regime for salaried, 44ADA for freelancers — FY 2026-27, with surcharge, marginal relief and advance tax. Verified rates.">
-  <link rel="stylesheet" href="assets/style.css?v=20261109f">
+  <link rel="stylesheet" href="assets/style.css?v=20261110a">
 </head>
 <body>
 
@@ -137,12 +137,19 @@
 <section id="tab-cheatsheet" class="panel" role="tabpanel">
   <section class="step">
     <h2 class="step-title">₹10L → ₹2Cr, both regimes</h2>
-    <p class="note center">Salaried, below 60. Old regime gets ₹50k standard + the preset below; new gets ₹75k standard only. Surcharge, marginal relief and cess included.</p>
-    <div class="seg mini center" id="cs-seg">
-      <span class="seg-pill" aria-hidden="true"></span>
-      <button class="seg-btn active" data-ded="0">No deductions</button>
-      <button class="seg-btn" data-ded="225000">Typical · 2.25L</button>
-      <button class="seg-btn" data-ded="500000">Aggressive · 5L</button>
+    <p class="note center">Salaried, below 60. Old regime gets ₹50k standard + the preset below; new gets ₹75k standard only. Surcharge, marginal relief and cess included. The tinted row tracks your salary on the Salaried tab.</p>
+    <div class="cs-controls">
+      <div class="seg mini" id="cs-seg">
+        <span class="seg-pill" aria-hidden="true"></span>
+        <button class="seg-btn active" data-ded="0">No deductions</button>
+        <button class="seg-btn" data-ded="225000">Typical · 2.25L</button>
+        <button class="seg-btn" data-ded="500000">Aggressive · 5L</button>
+      </div>
+      <div class="seg mini" id="cs-period-seg">
+        <span class="seg-pill" aria-hidden="true"></span>
+        <button class="seg-btn active" data-per="1">Yearly</button>
+        <button class="seg-btn" data-per="12">Monthly</button>
+      </div>
     </div>
     <div class="tablewrap"><table id="cs-table"></table></div>
   </section>
@@ -155,7 +162,7 @@
   Educational tool, not tax advice. Confirm with the <a href="https://incometax.gov.in" rel="noopener">Income Tax Department</a> or a CA before filing.</p>
 </footer>
 
-<script src="assets/engine.js?v=20261109f"></script>
-<script src="assets/app.js?v=20261109f"></script>
+<script src="assets/engine.js?v=20261110a"></script>
+<script src="assets/app.js?v=20261110a"></script>
 </body>
 </html>
