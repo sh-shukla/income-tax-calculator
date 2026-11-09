@@ -1,8 +1,9 @@
-/* UI glue — all tax math lives in engine.js, nothing is computed here. */
+/* Configurator glue — all tax math lives in engine.js. */
 "use strict";
 const T = window.TaxEngine;
 const $ = (id) => document.getElementById(id);
 const inr = (n) => "₹" + Math.round(n).toLocaleString("en-IN");
+const fmt = (n) => Math.round(n).toLocaleString("en-IN");
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ── animated numbers ── */
@@ -15,7 +16,7 @@ function countUp(el, value, render) {
   const t0 = performance.now(), dur = 380;
   (function tick(t) {
     const p = Math.min((t - t0) / dur, 1);
-    const e = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    const e = 1 - Math.pow(1 - p, 3);
     el.textContent = render(prev + (value - prev) * e);
     if (p < 1 && tweens.get(el) === value) requestAnimationFrame(tick);
   })(t0);
@@ -46,44 +47,72 @@ segment($("main-tabs"), (btn) => {
   scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 });
 
-/* ── regime card ── */
-function regimeCard(el, title, tag, gross, bd, isWinner) {
+/* ── giant money input + log-scale slider ──
+   A linear 3L–2Cr slider wastes most of its travel above 1Cr; a log scale
+   keeps the common range (10–50L) under your thumb. */
+function bigInput({ inputId, sliderId, min, max, chipsId, onChange }) {
+  const input = $(inputId), slider = $(sliderId);
+  const toVal = (t) => {
+    const raw = min * Math.pow(max / min, t / 1000);
+    const step = raw >= 10000000 ? 500000 : raw >= 1000000 ? 50000 : 10000;
+    return Math.round(raw / step) * step;
+  };
+  const toT = (v) => Math.round(1000 * Math.log(Math.max(v, min) / min) / Math.log(max / min));
+  let value = parseInt(input.value.replace(/[^0-9]/g, ""), 10) || min;
+
+  function paint() {
+    input.value = fmt(value);
+    const t = Math.min(Math.max(toT(value), 0), 1000);
+    slider.value = t;
+    slider.style.setProperty("--fill", t / 10 + "%");
+    if (chipsId) {
+      document.querySelectorAll(`#${chipsId} button`).forEach((b) =>
+        b.classList.toggle("on", +b.dataset.v === value));
+    }
+  }
+  slider.addEventListener("input", () => { value = toVal(+slider.value); paint(); onChange(value); });
+  input.addEventListener("input", () => {
+    value = parseInt(input.value.replace(/[^0-9]/g, ""), 10) || 0;
+    const t = Math.min(Math.max(toT(Math.max(value, min)), 0), 1000);
+    slider.value = t;
+    slider.style.setProperty("--fill", t / 10 + "%");
+    onChange(value);
+  });
+  input.addEventListener("blur", paint);
+  if (chipsId) {
+    document.querySelectorAll(`#${chipsId} button`).forEach((b) =>
+      b.addEventListener("click", () => { value = +b.dataset.v; paint(); onChange(value); }));
+  }
+  paint();
+  return { get: () => value };
+}
+
+/* ── compare tile ── */
+function tile(el, title, tag, gross, bd, isWinner, openMath) {
   if (!el.dataset.built) {
     el.dataset.built = "1";
-    el.innerHTML = `<span class="crown"></span><h3></h3><div class="tag"></div>
+    el.innerHTML = `<span class="badge"></span><h3></h3><div class="tag"></div>
       <div class="big" data-num></div><div class="sub">total tax · <span data-rate></span> effective</div>
       <div class="bar"><i></i></div>
-      <div class="barlabel"><span data-th></span><span data-mo></span></div>
-      <table></table>`;
+      <div class="barlabel"><b data-th></b><span data-mo></span></div>
+      <details${openMath ? " open" : ""}><summary>See the math</summary><table></table></details>`;
   }
-  el.classList.toggle("winner", isWinner);
-  el.querySelector(".crown").textContent = isWinner ? "🏆" : "";
+  el.querySelector(".badge").textContent = isWinner ? "Best for you" : "";
   el.querySelector("h3").textContent = title;
   el.querySelector(".tag").textContent = tag;
   countUp(el.querySelector("[data-num]"), bd.total);
   el.querySelector("[data-rate]").textContent = (gross ? (bd.total / gross) * 100 : 0).toFixed(1) + "%";
-  const keep = gross ? Math.max(0, 100 - (bd.total / gross) * 100) : 100;
-  el.querySelector(".bar i").style.width = keep + "%";
-  el.querySelector("[data-th]").textContent = inr(gross - bd.total) + " take-home";
+  el.querySelector(".bar i").style.width = (gross ? Math.max(0, 100 - (bd.total / gross) * 100) : 100) + "%";
+  el.querySelector("[data-th]").textContent = inr(gross - bd.total) + " kept";
   el.querySelector("[data-mo]").textContent = inr((gross - bd.total) / 12) + "/mo";
   const rows = [["Taxable income", inr(bd.taxable)], ["Slab tax", inr(bd.slabTax)]];
   if (bd.rebate) rows.push(["87A rebate", "− " + inr(bd.rebate)]);
   if (bd.marginalRelief) rows.push(["Marginal relief", "− " + inr(bd.marginalRelief)]);
   if (bd.surcharge) rows.push(["Surcharge", "+ " + inr(bd.surcharge)]);
   if (bd.surchargeRelief) rows.push(["Surcharge relief", "− " + inr(bd.surchargeRelief)]);
-  rows.push(["Cess 4%", "+ " + inr(bd.cess)]);
-  rows.push(["Total", inr(bd.total)]);
+  rows.push(["Cess 4%", "+ " + inr(bd.cess)], ["Total", inr(bd.total)]);
   el.querySelector("table").innerHTML = rows
-    .map(([k, v], i) => `<tr${i === rows.length - 1 ? ' class="total"' : ""}><td>${k}</td><td>${v}</td></tr>`)
-    .join("");
-}
-
-function verdict(el, newTotal, oldTotal, labels) {
-  const diff = Math.abs(newTotal - oldTotal);
-  el.classList.toggle("warn", newTotal >= oldTotal && diff >= 1);
-  if (diff < 1) { el.textContent = "Both options cost the same here."; return; }
-  const winner = newTotal < oldTotal ? labels[0] : labels[1];
-  el.textContent = `${winner} saves you ${inr(diff)} this year — ${inr(diff / 12)} every month.`;
+    .map(([k, v], i) => `<tr${i === rows.length - 1 ? ' class="total"' : ""}><td>${k}</td><td>${v}</td></tr>`).join("");
 }
 
 /* ── salaried ── */
@@ -95,21 +124,27 @@ function fteDeductions() {
     employerNPS: +$("d-empnps").value || 0,
   };
 }
+let fteValue;
 function renderFTE() {
-  const gross = +$("fte-gross").value || 0;
+  const gross = fteValue.get();
   const d = fteDeductions();
   const nb = T.newRegimeTax(T.salariedTaxable(gross, "new", d));
   const ob = T.oldRegimeTax(T.salariedTaxable(gross, "old", d), $("fte-age").value);
-  regimeCard($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total);
-  regimeCard($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total);
-  verdict($("fte-verdict"), nb.total, ob.total, ["New regime", "Old regime"]);
+  const best = Math.min(nb.total, ob.total);
+  const bestName = nb.total <= ob.total ? "New regime" : "Old regime";
+  countUp($("fte-keep"), gross - best);
+  $("fte-keepsub").innerHTML =
+    `with the <strong>${bestName.toLowerCase()}</strong> — ${inr((gross - best) / 12)} in hand every month` +
+    (Math.abs(nb.total - ob.total) >= 1 ? ` · saves <strong>${inr(Math.abs(nb.total - ob.total))}</strong> over the other` : "");
+  tile($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total);
+  tile($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total);
 }
 
 /* ── contractor ── */
+let ctValue, ctDigital = 1;
 function renderContractor() {
-  const receipts = +$("ct-receipts").value || 0;
-  const digital = +$("ct-digital").value;
-  const c = T.contractorIncome(receipts, { digitalShare: digital, expenses: +$("ct-expenses").value || 0 });
+  const receipts = ctValue.get();
+  const c = T.contractorIncome(receipts, { digitalShare: ctDigital, expenses: +$("ct-expenses").value || 0 });
   const regBd = T.newRegimeTax(Math.max(0, c.regularIncome));
   const adaEl = $("ct-44ada"), regEl = $("ct-regular");
   let adaBd = null;
@@ -119,30 +154,27 @@ function renderContractor() {
     const adaOld = T.oldRegimeTax(Math.max(0, c.presumptiveIncome - (+$("ct-deductions").value || 0)));
     adaBd = adaNew.total <= adaOld.total ? adaNew : adaOld;
     const rn = adaBd === adaNew ? "new regime" : "old regime + investments";
-    regimeCard(adaEl, "44ADA presumptive", `50% deemed income · ${rn} · ITR-4`, receipts, adaBd, adaBd.total <= regBd.total);
-    regimeCard(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, regBd.total < adaBd.total);
-    verdict($("ct-verdict"), adaBd.total, regBd.total, ["44ADA — no books, no audit —", "Regular books"]);
+    tile(adaEl, "44ADA presumptive", `50% deemed income · ${rn} · ITR-4`, receipts, adaBd, adaBd.total <= regBd.total);
+    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, regBd.total < adaBd.total);
   } else {
     delete adaEl.dataset.built;
-    adaEl.classList.remove("winner");
     adaEl.innerHTML = `<h3>44ADA presumptive</h3><div class="tag">not available at these receipts</div>
-      <p class="note" style="margin-top:12px">${inr(receipts)} exceeds the limit — ₹50L, or ₹75L only when ≥95% of receipts are digital (§58, ITA 2025). Regular books with ITR-3 apply; a tax audit may too.</p>`;
-    regimeCard(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, true);
-    const v = $("ct-verdict");
-    v.classList.add("warn");
-    v.textContent = "Above the 44ADA limit — regular books it is: " + inr(regBd.total) + " tax.";
+      <p class="note" style="margin-top:14px">${inr(receipts)} is past the limit — ₹50L, or ₹75L only when ≥95% of receipts are digital (§58, ITA 2025). Regular books with ITR-3 apply; a tax audit may too.</p>`;
+    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, true);
   }
 
-  const winning = adaBd && adaBd.total <= regBd.total ? adaBd : regBd;
+  const winBd = adaBd && adaBd.total <= regBd.total ? adaBd : regBd;
+  const winName = adaBd && adaBd.total <= regBd.total ? "44ADA — no books, no audit" : "regular books";
+  countUp($("ct-keep"), receipts - winBd.total);
+  $("ct-keepsub").innerHTML = `with <strong>${winName}</strong> — ${inr((receipts - winBd.total) / 12)} in hand every month`;
+
   const presumptive = !!(adaBd && adaBd.total <= regBd.total);
-  const sched = T.advanceTaxSchedule(winning.total, presumptive);
-  $("ct-advance").innerHTML = "<h3>Advance tax</h3>" +
+  const sched = T.advanceTaxSchedule(winBd.total, presumptive);
+  $("ct-advance").innerHTML =
     (sched.length === 0
-      ? `<p class="note">Liability ≤ ₹10,000 — no advance tax needed.</p>`
-      : (presumptive ? `<p class="note">44ADA perk: everything in one instalment.</p>` : "") +
-        `<table><tr><th>Due</th><th>Cumulative</th><th>Amount</th></tr>` +
-        sched.map((s) => `<tr><td>${s.due}</td><td>${s.cumulative * 100}%</td><td>${inr(s.amount)}</td></tr>`).join("") +
-        `</table><p class="note" style="margin-top:10px">Miss a date and interest runs at 1%/month (234B/C). Client TDS counts toward these.</p>`);
+      ? `<p class="tl-note">Liability ≤ ₹10,000 — no advance tax needed.</p>`
+      : sched.map((s) => `<div class="tl-card"><div class="due">${s.due}</div><div class="amt">${inr(s.amount)}</div><div class="cum">${s.cumulative * 100}% cumulative</div></div>`).join("") +
+        `<p class="tl-note">${presumptive ? "44ADA perk: everything in one instalment. " : ""}Miss a date and interest runs 1%/month (234B/C). Client TDS counts toward these.</p>`);
 }
 
 /* ── cheatsheet ── */
@@ -155,24 +187,19 @@ function renderCheatsheet() {
     const nt = T.newRegimeTax(T.salariedTaxable(g, "new")).total;
     const ot = T.oldRegimeTax(T.salariedTaxable(g, "old", d)).total;
     const newWins = nt <= ot;
-    return `<tr><td>${inr(g)}</td><td>${inr(nt)}</td><td>${inr((g - nt) / 12)}</td>` +
-      `<td>${inr(ot)}</td><td>${inr((g - ot) / 12)}</td>` +
+    return `<tr><td>${inr(g)}</td><td>${inr(nt)}</td><td>${inr((g - nt) / 12)}</td><td>${inr(ot)}</td><td>${inr((g - ot) / 12)}</td>` +
       `<td><span class="chip ${newWins ? "new" : "old"}">${newWins ? "New" : "Old"} · ${inr(Math.abs(nt - ot))}</span></td></tr>`;
   }).join("");
   $("cs-table").innerHTML = head + "<tbody>" + rows + "</tbody>";
 }
 segment($("cs-seg"), (btn) => { csDed = +btn.dataset.ded; renderCheatsheet(); });
+segment($("ct-digital-seg"), (btn) => { ctDigital = +btn.dataset.v; renderContractor(); });
 
-/* ── slider ↔ input sync ── */
-function pair(inputId, sliderId, render) {
-  $(sliderId).addEventListener("input", () => { $(inputId).value = $(sliderId).value; render(); });
-  $(inputId).addEventListener("input", () => { $(sliderId).value = $(inputId).value; });
-}
-pair("fte-gross", "fte-slider", renderFTE);
-pair("ct-receipts", "ct-slider", renderContractor);
-
-document.querySelectorAll("#tab-fte input, #tab-fte select").forEach((el) => el.addEventListener("input", renderFTE));
-document.querySelectorAll("#tab-contractor input, #tab-contractor select").forEach((el) => el.addEventListener("input", renderContractor));
+/* ── wire up ── */
+fteValue = bigInput({ inputId: "fte-gross", sliderId: "fte-slider", min: 300000, max: 20000000, chipsId: "fte-chips", onChange: renderFTE });
+ctValue = bigInput({ inputId: "ct-receipts", sliderId: "ct-slider", min: 500000, max: 10000000, onChange: renderContractor });
+["d-c80", "d-nps", "d-d80", "d-hra", "d-homeloan", "d-other", "d-empnps", "fte-age"].forEach((id) => $(id).addEventListener("input", renderFTE));
+["ct-expenses", "ct-deductions"].forEach((id) => $(id).addEventListener("input", renderContractor));
 
 renderFTE();
 renderContractor();
