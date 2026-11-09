@@ -145,6 +145,8 @@ input[type="range"].fat:active::-webkit-slider-thumb { cursor: grabbing; transfo
 .tile .tag { color: var(--muted); font-size: .82rem; margin-top: 3px; }
 .tile .big { font-size: clamp(2rem, 4.5vw, 2.7rem); font-weight: 800; letter-spacing: -0.02em; margin-top: 16px; font-variant-numeric: tabular-nums; }
 .tile .sub { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.tile .mid { margin-top: 12px; font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tile .mid em { font-style: normal; font-weight: 400; color: var(--muted); font-size: .8rem; }
 .tile .bar { height: 6px; border-radius: 3px; background: var(--surface-2); margin: 16px 0 6px; overflow: hidden; }
 .tile .bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--good), var(--accent)); transition: width .5s cubic-bezier(.32,.72,0,1); }
 .tile .barlabel { display: flex; justify-content: space-between; color: var(--muted); font-size: .76rem; }

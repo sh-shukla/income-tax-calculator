@@ -92,19 +92,21 @@ function tile(el, title, tag, gross, bd, isWinner, openMath) {
   if (!el.dataset.built) {
     el.dataset.built = "1";
     el.innerHTML = `<span class="badge"></span><h3></h3><div class="tag"></div>
-      <div class="big" data-num></div><div class="sub">total tax · <span data-rate></span> effective</div>
+      <div class="big" data-num></div><div class="sub">in hand every month</div>
+      <div class="mid"><span data-tax></span> <em>total tax · <span data-rate></span> effective</em></div>
       <div class="bar"><i></i></div>
-      <div class="barlabel"><b data-th></b><span data-mo></span></div>
+      <div class="barlabel"><b data-th></b><span data-yr></span></div>
       <details${openMath ? " open" : ""}><summary>See the math</summary><table></table></details>`;
   }
   el.querySelector(".badge").textContent = isWinner ? "Best for you" : "";
   el.querySelector("h3").textContent = title;
   el.querySelector(".tag").textContent = tag;
-  countUp(el.querySelector("[data-num]"), bd.total);
+  countUp(el.querySelector("[data-num]"), (gross - bd.total) / 12, (n) => inr(n) + "/mo");
+  countUp(el.querySelector("[data-tax]"), bd.total);
   el.querySelector("[data-rate]").textContent = (gross ? (bd.total / gross) * 100 : 0).toFixed(1) + "%";
   el.querySelector(".bar i").style.width = (gross ? Math.max(0, 100 - (bd.total / gross) * 100) : 100) + "%";
-  el.querySelector("[data-th]").textContent = inr(gross - bd.total) + " kept";
-  el.querySelector("[data-mo]").textContent = inr((gross - bd.total) / 12) + "/mo";
+  el.querySelector("[data-th]").textContent = inr(gross - bd.total) + " kept this year";
+  el.querySelector("[data-yr]").textContent = "";
   const rows = [["Taxable income", inr(bd.taxable)], ["Slab tax", inr(bd.slabTax)]];
   if (bd.rebate) rows.push(["87A rebate", "− " + inr(bd.rebate)]);
   if (bd.marginalRelief) rows.push(["Marginal relief", "− " + inr(bd.marginalRelief)]);
