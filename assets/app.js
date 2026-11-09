@@ -202,7 +202,7 @@ segment($("cs-seg"), (btn) => { csDed = +btn.dataset.ded; renderCheatsheet(); })
 segment($("ct-digital-seg"), (btn) => { ctDigital = +btn.dataset.v; renderContractor(); });
 
 /* ── wire up ── */
-fteValue = bigInput({ inputId: "fte-gross", sliderId: "fte-slider", min: 300000, max: 20000000, chipsId: "fte-chips", onChange: renderFTE });
+fteValue = bigInput({ inputId: "fte-gross", sliderId: "fte-slider", min: 300000, max: 30000000, chipsId: "fte-chips", onChange: renderFTE });
 ctValue = bigInput({ inputId: "ct-receipts", sliderId: "ct-slider", min: 500000, max: 10000000, onChange: renderContractor });
 ["d-c80", "d-nps", "d-d80", "d-hra", "d-homeloan", "d-other", "d-empnps", "fte-age"].forEach((id) => $(id).addEventListener("input", renderFTE));
 ["ct-expenses", "ct-deductions"].forEach((id) => $(id).addEventListener("input", renderContractor));
