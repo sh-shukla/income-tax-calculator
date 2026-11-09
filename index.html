@@ -23,117 +23,121 @@
 </nav>
 
 <header class="hero">
-  <p class="eyebrow">FY 2026-27 · Income-tax Act 2025 · rates verified from primary guides</p>
+  <p class="eyebrow">FY 2026-27 · Income-tax Act 2025 · verified rates</p>
   <h1>Know your <span class="grad">take-home</span>.</h1>
-  <p class="lede">Old regime or new. Salaried or freelancing. Every rupee of rebate, relief, surcharge and cess — computed the way a CA would, shown the way they never do.</p>
 </header>
 
 <main>
 
-<!-- ─────────────── Salaried ─────────────── -->
+<!-- ─────────────────────────── Salaried ─────────────────────────── -->
 <section id="tab-fte" class="panel active" role="tabpanel">
-  <div class="layout">
-    <aside class="card inputs reveal">
-      <h2>Your numbers</h2>
 
-      <label for="fte-gross">Gross annual salary</label>
-      <div class="money"><span>₹</span><input type="number" id="fte-gross" value="2400000" min="0" step="10000"></div>
-      <input type="range" id="fte-slider" min="300000" max="20000000" step="50000" value="2400000" aria-label="Salary slider">
-      <div class="scale"><span>₹3L</span><span>₹2Cr</span></div>
-
-      <label for="fte-age">Age</label>
-      <select id="fte-age">
-        <option value="below60" selected>Below 60</option>
-        <option value="senior">60–79</option>
-        <option value="superSenior">80+</option>
-      </select>
-
-      <h3>Old-regime deductions <span class="hint">caps auto-applied</span></h3>
-      <div class="field"><label for="d-c80">80C <em>PF · ELSS · LIC · max 1.5L</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-c80" value="150000" min="0" step="5000"></div></div>
-      <div class="field"><label for="d-nps">NPS self <em>80CCD(1B) · max 50k</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-nps" value="50000" min="0" step="5000"></div></div>
-      <div class="field"><label for="d-d80">Health insurance <em>80D · max 1L</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-d80" value="25000" min="0" step="5000"></div></div>
-      <div class="field"><label for="d-hra">HRA exemption <em>your computed amount</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-hra" value="0" min="0" step="5000"></div></div>
-      <div class="field"><label for="d-homeloan">Home-loan interest <em>24(b) · max 2L</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-homeloan" value="0" min="0" step="5000"></div></div>
-      <div class="field"><label for="d-other">Other <em>80TTA · 80G · LTA</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-other" value="0" min="0" step="5000"></div></div>
-
-      <h3>Both regimes</h3>
-      <div class="field"><label for="d-empnps">Employer NPS <em>80CCD(2)</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="d-empnps" value="0" min="0" step="5000"></div></div>
-    </aside>
-
-    <div class="results">
-      <div id="fte-verdict" class="verdict reveal"></div>
-      <div class="duo">
-        <article class="card regime reveal" id="fte-new"></article>
-        <article class="card regime reveal" id="fte-old"></article>
-      </div>
-      <p class="note">The new regime is the default since FY 2023-24 — you opt <em>into</em> the old one while filing. Salaried can switch every year.</p>
+  <section class="step">
+    <p class="step-label">Gross annual salary</p>
+    <div class="giant-money"><span>₹</span><input id="fte-gross" type="text" inputmode="numeric" value="24,00,000" aria-label="Gross annual salary"></div>
+    <input type="range" id="fte-slider" class="fat" min="0" max="1000" step="1" value="0" aria-label="Salary slider">
+    <div class="scale"><span>₹3L</span><span>₹2Cr</span></div>
+    <div class="chips" id="fte-chips">
+      <button data-v="1200000">12L</button><button data-v="1800000">18L</button><button data-v="2400000" class="on">24L</button><button data-v="3600000">36L</button><button data-v="5000000">50L</button><button data-v="10000000">1Cr</button>
     </div>
-  </div>
+  </section>
+
+  <section class="step keep">
+    <p class="step-label">You keep</p>
+    <div class="keep-num" id="fte-keep">₹0</div>
+    <p class="keep-sub" id="fte-keepsub"></p>
+  </section>
+
+  <section class="step">
+    <div class="tiles">
+      <article class="tile" id="fte-new"></article>
+      <article class="tile" id="fte-old"></article>
+    </div>
+    <p class="note center">The new regime is the default since FY 2023-24 — you opt <em>into</em> the old one while filing. Salaried can switch every year.</p>
+  </section>
+
+  <section class="step tune">
+    <h2 class="step-title">Fine-tune</h2>
+    <p class="note center">Investments and exemptions count under the <strong>old regime</strong>; employer NPS helps both.</p>
+    <div class="tune-grid">
+      <div class="tune-field"><label for="d-c80">80C <em>PF · ELSS · max 1.5L</em></label><div class="money"><span>₹</span><input type="number" id="d-c80" value="150000" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-nps">NPS self <em>80CCD(1B) · max 50k</em></label><div class="money"><span>₹</span><input type="number" id="d-nps" value="50000" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-d80">Health 80D <em>max 1L</em></label><div class="money"><span>₹</span><input type="number" id="d-d80" value="25000" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-hra">HRA exemption <em>computed</em></label><div class="money"><span>₹</span><input type="number" id="d-hra" value="0" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-homeloan">Home-loan 24(b) <em>max 2L</em></label><div class="money"><span>₹</span><input type="number" id="d-homeloan" value="0" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-other">Other <em>80TTA · 80G · LTA</em></label><div class="money"><span>₹</span><input type="number" id="d-other" value="0" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="d-empnps">Employer NPS <em>80CCD(2) · both</em></label><div class="money"><span>₹</span><input type="number" id="d-empnps" value="0" min="0" step="5000"></div></div>
+      <div class="tune-field"><label for="fte-age">Age</label>
+        <select id="fte-age"><option value="below60" selected>Below 60</option><option value="senior">60–79</option><option value="superSenior">80+</option></select></div>
+    </div>
+  </section>
 </section>
 
-<!-- ─────────────── Contractor ─────────────── -->
+<!-- ─────────────────────────── Contractor ─────────────────────────── -->
 <section id="tab-contractor" class="panel" role="tabpanel">
-  <div class="layout">
-    <aside class="card inputs reveal">
-      <h2>Your numbers</h2>
-      <label for="ct-receipts">Gross annual receipts</label>
-      <div class="money"><span>₹</span><input type="number" id="ct-receipts" value="4000000" min="0" step="50000"></div>
-      <input type="range" id="ct-slider" min="500000" max="10000000" step="50000" value="4000000" aria-label="Receipts slider">
-      <div class="scale"><span>₹5L</span><span>₹1Cr</span></div>
 
-      <label for="ct-digital">Digital receipts share</label>
-      <select id="ct-digital">
-        <option value="1" selected>95–100% — bank / UPI</option>
-        <option value="0.5">Below 95%</option>
-      </select>
-
-      <div class="field"><label for="ct-expenses">Actual annual expenses <em>for the regular-books path</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="ct-expenses" value="400000" min="0" step="25000"></div></div>
-      <div class="field"><label for="ct-deductions">Old-regime investments <em>if opting old under 44ADA</em></label>
-        <div class="money sm"><span>₹</span><input type="number" id="ct-deductions" value="0" min="0" step="10000"></div></div>
-    </aside>
-
-    <div class="results">
-      <div id="ct-verdict" class="verdict reveal"></div>
-      <div class="duo">
-        <article class="card regime reveal" id="ct-44ada"></article>
-        <article class="card regime reveal" id="ct-regular"></article>
-      </div>
-      <div class="card reveal" id="ct-advance"></div>
-      <div class="card checklist reveal">
-        <h3>Compliance, in order</h3>
-        <ul>
-          <li><strong>TDS 194J</strong> — clients withhold 10% on professional fees. It's your money: reclaim via 26AS/AIS at filing.</li>
-          <li><strong>GST</strong> — register at ₹20L receipts (₹10L NE/hill). <strong>Foreign clients? Register regardless</strong> — exports are zero-rated with LUT.</li>
-          <li><strong>ITR-4</strong> for 44ADA · <strong>ITR-3</strong> for regular books.</li>
-          <li><strong>44ADA lock</strong> (§58, ITA 2025) — opt out after using it and you're barred for 5 years. 50% is a floor, not a target.</li>
-          <li><strong>234B/C interest</strong> — missed advance tax costs 1% a month.</li>
-        </ul>
-      </div>
+  <section class="step">
+    <p class="step-label">Gross annual receipts</p>
+    <div class="giant-money"><span>₹</span><input id="ct-receipts" type="text" inputmode="numeric" value="40,00,000" aria-label="Gross annual receipts"></div>
+    <input type="range" id="ct-slider" class="fat" min="0" max="1000" step="1" value="0" aria-label="Receipts slider">
+    <div class="scale"><span>₹5L</span><span>₹1Cr</span></div>
+    <div class="seg mini center" id="ct-digital-seg">
+      <span class="seg-pill" aria-hidden="true"></span>
+      <button class="seg-btn active" data-v="1">95%+ digital</button>
+      <button class="seg-btn" data-v="0.5">Below 95%</button>
     </div>
-  </div>
+  </section>
+
+  <section class="step keep">
+    <p class="step-label">You keep</p>
+    <div class="keep-num" id="ct-keep">₹0</div>
+    <p class="keep-sub" id="ct-keepsub"></p>
+  </section>
+
+  <section class="step">
+    <div class="tiles">
+      <article class="tile" id="ct-44ada"></article>
+      <article class="tile" id="ct-regular"></article>
+    </div>
+  </section>
+
+  <section class="step tune">
+    <h2 class="step-title">Fine-tune</h2>
+    <div class="tune-grid narrow">
+      <div class="tune-field"><label for="ct-expenses">Actual expenses <em>regular-books path</em></label><div class="money"><span>₹</span><input type="number" id="ct-expenses" value="400000" min="0" step="25000"></div></div>
+      <div class="tune-field"><label for="ct-deductions">Old-regime investments <em>under 44ADA</em></label><div class="money"><span>₹</span><input type="number" id="ct-deductions" value="0" min="0" step="10000"></div></div>
+    </div>
+  </section>
+
+  <section class="step">
+    <h2 class="step-title">Advance tax</h2>
+    <div class="timeline" id="ct-advance"></div>
+  </section>
+
+  <section class="step">
+    <h2 class="step-title">The paperwork</h2>
+    <div class="facts">
+      <div class="fact"><strong>TDS 194J</strong>Clients withhold 10% on fees — your pre-paid tax. Reclaim via 26AS/AIS at filing.</div>
+      <div class="fact"><strong>GST</strong>Register at ₹20L receipts (₹10L NE/hill). Foreign clients? Register regardless — exports are zero-rated with LUT.</div>
+      <div class="fact"><strong>ITR form</strong>ITR-4 for 44ADA. ITR-3 for regular books.</div>
+      <div class="fact"><strong>44ADA lock</strong>Opt out after using it and you're barred for 5 years (§58, ITA 2025). 50% is a floor, not a target.</div>
+    </div>
+  </section>
 </section>
 
-<!-- ─────────────── Cheatsheet ─────────────── -->
+<!-- ─────────────────────────── Cheatsheet ─────────────────────────── -->
 <section id="tab-cheatsheet" class="panel" role="tabpanel">
-  <div class="card wide reveal">
-    <h2>₹10L → ₹2Cr, both regimes</h2>
-    <p class="note">Salaried, below 60. Old regime gets ₹50k standard + the preset below; new regime gets ₹75k standard only. Surcharge, marginal relief and cess included.</p>
-    <div class="seg mini" id="cs-seg">
+  <section class="step">
+    <h2 class="step-title">₹10L → ₹2Cr, both regimes</h2>
+    <p class="note center">Salaried, below 60. Old regime gets ₹50k standard + the preset below; new gets ₹75k standard only. Surcharge, marginal relief and cess included.</p>
+    <div class="seg mini center" id="cs-seg">
       <span class="seg-pill" aria-hidden="true"></span>
       <button class="seg-btn active" data-ded="0">No deductions</button>
       <button class="seg-btn" data-ded="225000">Typical · 2.25L</button>
       <button class="seg-btn" data-ded="500000">Aggressive · 5L</button>
     </div>
     <div class="tablewrap"><table id="cs-table"></table></div>
-  </div>
+  </section>
 </section>
 
 </main>
