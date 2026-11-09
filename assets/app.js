@@ -135,9 +135,11 @@ function renderFTE() {
   const best = Math.min(nb.total, ob.total);
   const bestName = nb.total <= ob.total ? "New regime" : "Old regime";
   countUp($("fte-keep"), gross - best);
-  $("fte-keepsub").innerHTML =
-    `with the <strong>${bestName.toLowerCase()}</strong> — ${inr((gross - best) / 12)} in hand every month` +
-    (Math.abs(nb.total - ob.total) >= 1 ? ` · saves <strong>${inr(Math.abs(nb.total - ob.total))}</strong> over the other` : "");
+  countUp($("fte-tax"), best);
+  countUp($("fte-mo"), (gross - best) / 12);
+  const diff = Math.abs(nb.total - ob.total);
+  $("fte-win").textContent = bestName;
+  $("fte-winlabel").textContent = diff >= 1 ? "saves " + inr(diff) + " over the other" : "either regime";
   tile($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total);
   tile($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total);
 }
@@ -166,9 +168,11 @@ function renderContractor() {
   }
 
   const winBd = adaBd && adaBd.total <= regBd.total ? adaBd : regBd;
-  const winName = adaBd && adaBd.total <= regBd.total ? "44ADA — no books, no audit" : "regular books";
+  const winName = adaBd && adaBd.total <= regBd.total ? "44ADA" : "Regular books";
   countUp($("ct-keep"), receipts - winBd.total);
-  $("ct-keepsub").innerHTML = `with <strong>${winName}</strong> — ${inr((receipts - winBd.total) / 12)} in hand every month`;
+  countUp($("ct-tax"), winBd.total);
+  countUp($("ct-mo"), (receipts - winBd.total) / 12);
+  $("ct-win").textContent = winName;
 
   const presumptive = !!(adaBd && adaBd.total <= regBd.total);
   const sched = T.advanceTaxSchedule(winBd.total, presumptive);

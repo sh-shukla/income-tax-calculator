@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Indian Tax Calculator FY 2026-27</title>
   <meta name="description" content="Old vs new regime for salaried, 44ADA for freelancers — FY 2026-27, with surcharge, marginal relief and advance tax. Verified rates.">
-  <link rel="stylesheet" href="assets/style.css?v=20261109c">
+  <link rel="stylesheet" href="assets/style.css?v=20261109d">
 </head>
 <body>
 
@@ -45,7 +45,11 @@
   <section class="step keep">
     <p class="step-label">You keep</p>
     <div class="keep-num" id="fte-keep">₹0</div>
-    <p class="keep-sub" id="fte-keepsub"></p>
+    <div class="keep-stats">
+      <div class="ks"><b id="fte-tax">₹0</b><span>total tax</span></div>
+      <div class="ks"><b id="fte-mo">₹0</b><span>per month in hand</span></div>
+      <div class="ks"><b id="fte-win">—</b><span id="fte-winlabel">best regime</span></div>
+    </div>
   </section>
 
   <section class="step">
@@ -91,7 +95,11 @@
   <section class="step keep">
     <p class="step-label">You keep</p>
     <div class="keep-num" id="ct-keep">₹0</div>
-    <p class="keep-sub" id="ct-keepsub"></p>
+    <div class="keep-stats">
+      <div class="ks"><b id="ct-tax">₹0</b><span>total tax</span></div>
+      <div class="ks"><b id="ct-mo">₹0</b><span>per month in hand</span></div>
+      <div class="ks"><b id="ct-win">—</b><span>best option</span></div>
+    </div>
   </section>
 
   <section class="step">
@@ -147,7 +155,7 @@
   Educational tool, not tax advice. Confirm with the <a href="https://incometax.gov.in" rel="noopener">Income Tax Department</a> or a CA before filing.</p>
 </footer>
 
-<script src="assets/engine.js?v=20261109c"></script>
-<script src="assets/app.js?v=20261109c"></script>
+<script src="assets/engine.js?v=20261109d"></script>
+<script src="assets/app.js?v=20261109d"></script>
 </body>
 </html>
