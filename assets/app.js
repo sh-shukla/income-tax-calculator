@@ -210,3 +210,23 @@ ctValue = bigInput({ inputId: "ct-receipts", sliderId: "ct-slider", min: 500000,
 renderFTE();
 renderContractor();
 renderCheatsheet();
+
+/* ── scroll reveal ──
+   Static containers only: tiles/facts re-render their children, so the
+   observed element itself must never be rebuilt. */
+if (!reduced && "IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+
+  document.querySelectorAll(".step, .tablewrap").forEach((el) => { el.classList.add("io"); io.observe(el); });
+  document.querySelectorAll(".tiles, .facts, .tune-grid").forEach((group) => {
+    [...group.children].forEach((el, i) => {
+      el.classList.add("io");
+      el.style.setProperty("--io-delay", (i % 6) * 0.09 + "s");
+      io.observe(el);
+    });
+  });
+}
