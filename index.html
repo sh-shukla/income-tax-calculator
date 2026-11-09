@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Indian Tax Calculator FY 2026-27</title>
+  <meta name="description" content="Old vs new regime for salaried, 44ADA for freelancers/contractors — FY 2026-27, with surcharge, marginal relief and advance tax.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header>
+  <h1>🇮🇳 Indian Tax Calculator</h1>
+  <p class="sub">FY 2026-27 (AY 2027-28) · Income-tax Act 2025 · verified rates, no guesswork</p>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="fte">Salaried (FTE)</button>
+    <button class="tab" data-tab="contractor">Contractor / Freelancer</button>
+    <button class="tab" data-tab="cheatsheet">Cheatsheet</button>
+  </nav>
+</header>
+
+<main>
+<!-- ───────────────────────── Salaried ───────────────────────── -->
+<section id="tab-fte" class="panel active">
+  <div class="grid">
+    <div class="card inputs">
+      <h2>Your numbers</h2>
+      <label>Gross annual salary (₹)
+        <input type="number" id="fte-gross" value="2400000" min="0" step="10000">
+      </label>
+      <label>Age
+        <select id="fte-age">
+          <option value="below60" selected>Below 60</option>
+          <option value="senior">60–79</option>
+          <option value="superSenior">80+</option>
+        </select>
+      </label>
+
+      <h3>Old-regime deductions <span class="hint">(caps applied automatically)</span></h3>
+      <label>80C — PF, ELSS, LIC, PPF… <span class="cap">max 1.5L</span>
+        <input type="number" id="d-c80" value="150000" min="0" step="5000">
+      </label>
+      <label>NPS self — 80CCD(1B) <span class="cap">max 50k</span>
+        <input type="number" id="d-nps" value="50000" min="0" step="5000">
+      </label>
+      <label>Health insurance — 80D <span class="cap">max 1L</span>
+        <input type="number" id="d-d80" value="25000" min="0" step="5000">
+      </label>
+      <label>HRA exemption (computed amount)
+        <input type="number" id="d-hra" value="0" min="0" step="5000">
+      </label>
+      <label>Home-loan interest — 24(b) <span class="cap">max 2L</span>
+        <input type="number" id="d-homeloan" value="0" min="0" step="5000">
+      </label>
+      <label>Other (80TTA, 80G, LTA…)
+        <input type="number" id="d-other" value="0" min="0" step="5000">
+      </label>
+      <h3>Both regimes</h3>
+      <label>Employer NPS — 80CCD(2) <span class="cap">14% basic (new) / 10% (old)</span>
+        <input type="number" id="d-empnps" value="0" min="0" step="5000">
+      </label>
+    </div>
+
+    <div class="results">
+      <div id="fte-verdict" class="verdict"></div>
+      <div class="cards2">
+        <div class="card regime" id="fte-new"></div>
+        <div class="card regime" id="fte-old"></div>
+      </div>
+      <p class="note">New regime is the default since FY 2023-24; you opt <em>into</em> old regime while filing. Salaried can switch every year.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Contractor ───────────────────────── -->
+<section id="tab-contractor" class="panel">
+  <div class="grid">
+    <div class="card inputs">
+      <h2>Your numbers</h2>
+      <label>Gross annual receipts (₹)
+        <input type="number" id="ct-receipts" value="4000000" min="0" step="50000">
+      </label>
+      <label>Digital receipts share
+        <select id="ct-digital">
+          <option value="1" selected>95–100% (bank/UPI)</option>
+          <option value="0.5">Below 95%</option>
+        </select>
+      </label>
+      <label>Actual annual expenses (₹) <span class="hint">for the regular-books comparison</span>
+        <input type="number" id="ct-expenses" value="400000" min="0" step="25000">
+      </label>
+      <label>Old-regime investments (80C+NPS+80D…) if opting old
+        <input type="number" id="ct-deductions" value="0" min="0" step="10000">
+      </label>
+    </div>
+
+    <div class="results">
+      <div id="ct-verdict" class="verdict"></div>
+      <div class="cards2">
+        <div class="card regime" id="ct-44ada"></div>
+        <div class="card regime" id="ct-regular"></div>
+      </div>
+      <div class="card" id="ct-advance"></div>
+      <div class="card checklist">
+        <h3>Contractor compliance checklist</h3>
+        <ul>
+          <li><strong>TDS:</strong> clients deduct 10% u/s 194J on professional fees — it's pre-paid tax, claim it via Form 26AS/AIS when filing.</li>
+          <li><strong>GST:</strong> register at ₹20L receipts (₹10L NE/hill states). <strong>Exporting services (foreign clients)? Registration required regardless</strong> — exports are zero-rated with LUT.</li>
+          <li><strong>ITR form:</strong> ITR-4 for 44ADA, ITR-3 for regular books.</li>
+          <li><strong>44ADA fine print (§58, ITA 2025):</strong> once you opt out after using it, you can't return for 5 years. 50% is the floor — declare more if you earned more.</li>
+          <li><strong>Interest:</strong> missing advance tax costs 1%/month u/s 234B/234C.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── Cheatsheet ───────────────────────── -->
+<section id="tab-cheatsheet" class="panel">
+  <div class="card">
+    <h2>Old vs new — take-home, ₹10L to ₹2Cr</h2>
+    <p class="note">Salaried, below 60. Old regime assumes the deductions you pick below (plus ₹50k standard); new regime gets ₹75k standard only. Includes surcharge, marginal relief, 4% cess.</p>
+    <label class="inline">Old-regime deductions preset
+      <select id="cs-preset">
+        <option value="0">None</option>
+        <option value="225000" selected>Typical — 2.25L (80C+NPS+80D)</option>
+        <option value="500000">Aggressive — 5L (adds HRA/24b)</option>
+      </select>
+    </label>
+    <div class="tablewrap"><table id="cs-table"></table></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>Rates verified Nov 2026 from multiple sources — see <a href="https://github.com/sh-shukla/income-tax-calculator#sources">sources</a>.
+  Educational tool, not tax advice; confirm with the <a href="https://incometax.gov.in" rel="noopener">Income Tax Dept calculator</a> or a CA before filing.</p>
+</footer>
+
+<script src="assets/engine.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

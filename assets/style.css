@@ -1,0 +1,95 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --ink: #1a1d27;
+  --muted: #5b6172;
+  --line: #e3e6ef;
+  --accent: #2a5bd7;
+  --good: #117a4e;
+  --good-bg: #e6f6ee;
+  --warn: #b25e09;
+  --warn-bg: #fdf1e2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11131a;
+    --card: #1a1d27;
+    --ink: #e8eaf2;
+    --muted: #9aa1b5;
+    --line: #2a2e3d;
+    --accent: #7c9bff;
+    --good: #4cc38a;
+    --good-bg: #15271e;
+    --warn: #e5a158;
+    --warn-bg: #2b2115;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+header { text-align: center; padding: 28px 16px 0; }
+h1 { margin: 0; font-size: 1.7rem; }
+.sub { color: var(--muted); margin: 6px 0 18px; }
+main { max-width: 1060px; margin: 0 auto; padding: 16px; }
+footer { max-width: 1060px; margin: 8px auto 40px; padding: 0 16px; color: var(--muted); font-size: .85rem; }
+a { color: var(--accent); }
+
+.tabs { display: inline-flex; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 5px; }
+.tab { border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+.tab.active { background: var(--accent); color: #fff; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.card h2 { margin: 0 0 10px; font-size: 1.1rem; }
+.card h3 { margin: 16px 0 6px; font-size: .95rem; color: var(--muted); }
+
+label { display: block; margin: 10px 0 0; font-size: .88rem; font-weight: 600; }
+label.inline { display: inline-block; }
+input, select {
+  width: 100%; margin-top: 4px; padding: 9px 10px; font: inherit;
+  color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+}
+.cap, .hint { font-weight: 400; color: var(--muted); font-size: .78rem; }
+
+.results { display: flex; flex-direction: column; gap: 14px; }
+.cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .cards2 { grid-template-columns: 1fr; } }
+
+.verdict {
+  background: var(--good-bg); color: var(--good);
+  border: 1px solid color-mix(in srgb, var(--good) 35%, transparent);
+  border-radius: 14px; padding: 14px 18px; font-weight: 700; font-size: 1.05rem;
+}
+.verdict.warn { background: var(--warn-bg); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
+
+.regime h3 { margin: 0 0 2px; font-size: 1rem; color: var(--ink); }
+.regime .tag { font-size: .75rem; color: var(--muted); }
+.regime .big { font-size: 1.6rem; font-weight: 800; margin: 8px 0 2px; }
+.regime .takehome { color: var(--good); font-weight: 700; }
+.regime table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .85rem; }
+.regime td { padding: 3px 0; color: var(--muted); }
+.regime td:last-child { text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.regime tr.total td { border-top: 1px solid var(--line); padding-top: 6px; font-weight: 700; color: var(--ink); }
+.regime.winner { outline: 2px solid var(--good); }
+
+.tablewrap { overflow-x: auto; margin-top: 12px; }
+#cs-table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+#cs-table th, #cs-table td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#cs-table th:first-child, #cs-table td:first-child { text-align: left; }
+#cs-table th { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+#cs-table td.win-new { color: var(--good); font-weight: 700; }
+#cs-table td.win-old { color: var(--warn); font-weight: 700; }
+
+.checklist ul { margin: 8px 0 0; padding-left: 18px; }
+.checklist li { margin: 8px 0; font-size: .9rem; }
+.note { color: var(--muted); font-size: .85rem; }
+#ct-advance table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+#ct-advance td, #ct-advance th { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+#ct-advance td:last-child { text-align: right; font-variant-numeric: tabular-nums; }

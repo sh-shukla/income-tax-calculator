@@ -1,113 +1,34 @@
-# 🌟 Income Tax Calculator (New Regime)
+# Indian Tax Calculator — FY 2026-27
 
-A beautiful, interactive command-line tool to calculate Indian income tax under the new tax regime. This calculator provides detailed breakdowns of your tax liability, monthly salary, and effective tax rates with a user-friendly interface.
+**Live: [sh-shukla.github.io/income-tax-calculator](https://sh-shukla.github.io/income-tax-calculator/)**
 
-![Python Version](https://img.shields.io/badge/python-3.6+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+Old vs new regime for salaried people, 44ADA presumptive vs regular books for contractors/freelancers — with the parts most calculators skip: §87A marginal relief, surcharge marginal relief, deduction caps, advance-tax schedules and the compliance fine print.
 
-## ✨ Features
+## What it answers
 
-- 🎨 Beautiful CLI interface with colored output
-- 📊 Detailed tax breakdown with tables
-- 💰 Both annual and monthly calculations
-- 📈 Tax bracket visualization
-- 🔄 Multiple calculations in one session
-- 💸 Effective tax rate calculation
-- ⚡ Fast and accurate calculations
+- **Salaried (FTE):** which regime wins for *your* salary and *your* investments (80C, NPS, 80D, HRA, home-loan interest, employer NPS), with a full breakdown — slab tax, rebate, marginal relief, surcharge, cess — and monthly take-home.
+- **Contractor / freelancer / remote-for-foreign-company:** 44ADA (§58, Income-tax Act 2025) presumptive taxation vs regular books, eligibility (₹50L / ₹75L at ≥95% digital receipts), advance-tax instalments, GST registration triggers, 194J TDS recovery.
+- **[Cheatsheet](CHEATSHEET.md):** old-vs-new take-home from ₹10L to ₹2Cr, generated from the same engine.
 
-## 🚀 Installation
+## Correctness
 
-1. Clone the repository:
+The engine ([assets/engine.js](assets/engine.js)) is the single source of truth — UI, cheatsheet and tests all consume it. Every tricky number is pinned by a test against a **published worked example**, not against the implementation ([tests/engine.test.js](tests/engine.test.js)):
+
 ```bash
-git clone https://github.com/sh-shukla/income-tax-calculator.git
-cd income-tax-calculator
+node tests/engine.test.js       # 23 assertions, incl. ₹12.1L → ₹10,400 marginal relief
+node scripts/gen-cheatsheet.js  # regenerates CHEATSHEET.md
 ```
 
-2. Create a virtual environment (recommended):
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+Covered: 87A rebate (₹60k/₹12L new, ₹12.5k/₹5L old) · 87A marginal relief window (to ~₹12.71L) · surcharge 10/15/25% (new, capped) and 10/15/25/37% (old) · surcharge marginal relief at every threshold · age-based exemptions · deduction caps · 44ADA limits and the 5-year lock-out · advance tax 15/45/75/100 vs the single 44ADA instalment.
 
-3. Install required packages:
-```bash
-pip install -r requirements.txt
-```
+## Sources
 
-## 💻 Usage
+Rates verified (Nov 2026) across: [ClearTax](https://cleartax.in/s/income-tax-slabs) · [CAclubindia on FY 2026-27 slabs & relief](https://www.caclubindia.com/articles/new-tax-regime-fy-202627-complete-slab-rebate-marginal-relief-reference-56353.asp) · [BankBazaar](https://ndtvmoney.bankbazaar.com/tax/income-tax-slabs.html) · [filingsetu on §87A](https://filingsetu.in/blog/section-87a-rebate) · [finnovate on 44ADA](https://www.finnovate.in/learn/blog/section-44ada-presumptive-tax-for-professionals-explained) · [tax2win freelancer guide](https://tax2win.in/guide/income-tax-return-filing-for-freelancers) · [wisemonk advance-tax dates](https://www.wisemonk.io/blogs/advance-tax-for-freelancers-dates). Key fact: **Budget 2026 changed no slabs** — FY 2026-27 keeps the Budget-2025 structure under the Income-tax Act 2025 (§87A → §156, §44ADA → §58).
 
-Simply run:
-```bash
-python new_regime_calculator.py
-```
+## Scope & disclaimer
 
-Or make it executable (Linux/Mac):
-```bash
-chmod +x new_regime_calculator.py
-./new_regime_calculator.py
-```
+Resident individuals, normal income only — no capital gains, ESOP perquisites, foreign assets or AMT. Educational tool, **not tax advice**: confirm with the [Income Tax Department's calculator](https://incometax.gov.in) or a CA before filing or choosing a regime.
 
-## 📊 Tax Brackets (New Regime)
+## License
 
-| Income Range | Tax Rate |
-|-------------|----------|
-| Up to ₹4,00,000 | 0% |
-| ₹4,00,001 - ₹8,00,000 | 5% |
-| ₹8,00,001 - ₹12,00,000 | 10% |
-| ₹12,00,001 - ₹16,00,000 | 15% |
-| ₹16,00,001 - ₹20,00,000 | 20% |
-| ₹20,00,001 - ₹24,00,000 | 25% |
-| Above ₹24,00,000 | 30% |
-
-## 📝 Requirements
-
-- Python 3.6 or higher
-- rich library (for beautiful CLI interface)
-
-## 🛠️ Development Setup
-
-1. Install development dependencies:
-```bash
-pip install -r requirements-dev.txt
-```
-
-2. Run tests:
-```bash
-python -m pytest tests/
-```
-
-## 📦 Project Structure
-
-```
-income-tax-calculator/
-│
-├── new_regime_calculator.py  # Main calculator script
-├── requirements.txt         # Project dependencies
-├── requirements-dev.txt    # Development dependencies
-├── tests/                  # Test files
-├── .gitignore             # Git ignore file
-└── README.md              # Project documentation
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Rich library for beautiful CLI interface
-- All contributors who help improve this calculator
-
-## 📞 Support
-
-If you encounter any issues or have questions, please file an issue on the [GitHub issue tracker](https://github.com/sh-shukla/income-tax-calculator/issues).
+MIT
