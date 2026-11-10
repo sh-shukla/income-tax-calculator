@@ -117,6 +117,24 @@ check("no advance tax under ₹10k liability", () => {
   assert.strictEqual(T.advanceTaxSchedule(9000, true).length, 0);
 });
 
+console.log("slab segments (for visualizations)");
+check("new-regime segments sum to taxable and to slab tax", () => {
+  for (const taxable of [950000, 1200000, 2325000, 5010000]) {
+    const segs = T.slabSegments(taxable, "new");
+    const amount = segs.reduce((a, s) => a + s.amount, 0);
+    const tax = segs.reduce((a, s) => a + s.tax, 0);
+    assert.strictEqual(amount, taxable);
+    assert.strictEqual(Math.round(tax), T.newRegimeTax(taxable).slabTax);
+  }
+});
+check("old-regime segments respect age exemption and sum to slab tax", () => {
+  const segs = T.slabSegments(2125000, "old", "below60");
+  assert.strictEqual(segs[0].rate, 0);
+  assert.strictEqual(segs[0].upto, 250000);
+  const tax = segs.reduce((a, s) => a + s.tax, 0);
+  assert.strictEqual(Math.round(tax), T.oldRegimeTax(2125000).slabTax);
+});
+
 if (failed) {
   console.error("\n" + failed + " test(s) FAILED");
   process.exit(1);
