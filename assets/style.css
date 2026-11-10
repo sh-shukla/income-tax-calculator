@@ -235,7 +235,7 @@ footer { max-width: 760px; margin: 0 auto; padding: 56px 20px; color: var(--mute
    browser supports it, with a loud one-shot rise everywhere else. */
 .step-glow {
   position: relative;
-  min-height: 100svh;
+  min-height: min(88svh, 860px);
   max-width: 920px;
   display: flex; flex-direction: column; justify-content: center;
   padding-top: 0;
