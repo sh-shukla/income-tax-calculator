@@ -130,6 +130,38 @@ input[type="range"].fat:active::-webkit-slider-thumb { cursor: grabbing; transfo
 .ks b { display: block; font-size: clamp(1.2rem, 3vw, 1.55rem); font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
 .ks span { color: var(--muted); font-size: .76rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
 
+/* ── take-home composition bars (palette validated: dataviz six checks) ── */
+:root { --viz-keep: #1d7a46; --viz-tax: #0071e3; }
+@media (prefers-color-scheme: dark) {
+  :root { --viz-keep: #25a846; --viz-tax: #2997ff; }
+}
+.split { max-width: 640px; margin: 26px auto 0; display: flex; flex-direction: column; gap: 14px; text-align: left; }
+.split .srow .shead { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: 5px; }
+.split .srow .shead b { color: var(--ink); font-weight: 650; }
+.split .srow .shead span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.sbar {
+  display: flex; gap: 2px; height: 26px;
+  border-radius: 6px; overflow: hidden; background: var(--surface-2);
+}
+.sbar i {
+  display: flex; align-items: center; padding: 0 8px; min-width: 0;
+  font-style: normal; font-size: .72rem; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden;
+  transition: flex-grow .5s cubic-bezier(.32,.72,0,1);
+}
+.sbar .keep-seg { background: var(--viz-keep); }
+.sbar .tax-seg { background: var(--viz-tax); justify-content: flex-end; }
+.split .legend { display: flex; gap: 18px; justify-content: center; font-size: .76rem; color: var(--muted); }
+.split .legend i { font-style: normal; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.split .legend .k i { background: var(--viz-keep); }
+.split .legend .t i { background: var(--viz-tax); }
+
+/* slab-fill strip inside See the math (sequential: one hue, light→dark) */
+.slabs { display: flex; gap: 2px; height: 20px; border-radius: 5px; overflow: hidden; margin: 12px 0 4px; background: var(--surface-2); }
+.slabs i { font-style: normal; font-size: .64rem; font-weight: 700; display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.45); min-width: 14px; overflow: hidden; white-space: nowrap; }
+.slabs i.z { color: var(--muted); background: transparent; outline: 1px dashed var(--line); outline-offset: -2px; }
+.slabnote { color: var(--muted); font-size: .72rem; margin-bottom: 8px; }
+
 /* compare tiles */
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; text-align: left; }
 @media (max-width: 680px) { .tiles { grid-template-columns: 1fr; } }
@@ -235,7 +267,7 @@ footer { max-width: 760px; margin: 0 auto; padding: 56px 20px; color: var(--mute
    browser supports it, with a loud one-shot rise everywhere else. */
 .step-glow {
   position: relative;
-  min-height: 100svh;
+  min-height: min(88svh, 860px);
   max-width: 920px;
   display: flex; flex-direction: column; justify-content: center;
   padding-top: 0;

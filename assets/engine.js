@@ -212,7 +212,37 @@
     ];
   }
 
+  // slabSegments: how taxable income fills each slab — for visualizations.
+  // Pure derivation from the same slab tables; amounts sum to the taxable
+  // income and taxes sum to the slab tax, which the tests assert.
+  function slabSegments(taxable, regime, age) {
+    taxable = Math.max(0, Math.round(taxable));
+    let bands;
+    if (regime === "old") {
+      const ex = OLD_REGIME.exemption[age || "below60"];
+      bands = [
+        [ex, 0],
+        [Math.max(ex, 500000), 0.05],
+        [1000000, 0.20],
+        [Infinity, 0.30],
+      ];
+    } else {
+      bands = NEW_REGIME.slabs;
+    }
+    const out = [];
+    let prev = 0;
+    for (const [upto, rate] of bands) {
+      if (taxable > prev && upto > prev) {
+        const amount = Math.min(taxable, upto) - prev;
+        out.push({ from: prev, upto: Math.min(taxable, upto), rate, amount, tax: amount * rate });
+      }
+      prev = Math.max(prev, upto);
+    }
+    return out;
+  }
+
   const TaxEngine = {
+    slabSegments,
     FY: "2026-27",
     newRegimeTax,
     oldRegimeTax,

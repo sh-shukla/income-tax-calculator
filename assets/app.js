@@ -91,8 +91,44 @@ function bigInput({ inputId, sliderId, min, max, chipsId, onChange }) {
   return { get: () => value };
 }
 
+/* ── take-home composition bars ── */
+function splitBars(el, rows) {
+  // rows: [{label, gross, tax, winner}] — two segments per bar, 2px gaps,
+  // direct labels in the segments when they fit, amounts in text tokens above.
+  el.innerHTML = rows.map((r) => {
+    const keep = Math.max(0, r.gross - r.tax);
+    const kp = r.gross ? (keep / r.gross) * 100 : 100;
+    const tp = 100 - kp;
+    return `<div class="srow">
+      <div class="shead"><b>${r.label}${r.winner ? " 🏆" : ""}</b>
+        <span>${inr(keep)} kept · ${inr(r.tax)} tax</span></div>
+      <div class="sbar" role="img" aria-label="${r.label}: ${inr(keep)} in hand, ${inr(r.tax)} tax">
+        <i class="keep-seg" style="flex-grow:${kp}" title="In hand: ${inr(keep)}">${kp > 18 ? inr(keep) : ""}</i>
+        ${r.tax > 0 ? `<i class="tax-seg" style="flex-grow:${tp}" title="Tax: ${inr(r.tax)}">${tp > 14 ? inr(r.tax) : ""}</i>` : ""}
+      </div></div>`;
+  }).join("") +
+  `<div class="legend"><span class="k"><i></i>in hand</span><span class="t"><i></i>tax</span></div>`;
+}
+
+/* ── slab-fill strip: how taxable income moves through the slabs ── */
+function slabStrip(taxable, regime, age) {
+  if (!taxable) return "";
+  const segs = T.slabSegments(taxable, regime, age);
+  const cells = segs.map((s) => {
+    const w = Math.max((s.amount / taxable) * 100, 3);
+    const label = (s.rate * 100) + "%";
+    const alpha = s.rate === 0 ? 0 : 0.45 + (s.rate / 0.30) * 0.55;
+    const style = s.rate === 0
+      ? `flex-grow:${w}`
+      : `flex-grow:${w};background:color-mix(in srgb, var(--viz-tax) ${Math.round(alpha * 100)}%, var(--surface-2))`;
+    return `<i class="${s.rate === 0 ? "z" : ""}" style="${style}" title="${inr(s.amount)} taxed at ${label} → ${inr(s.tax)}">${label}</i>`;
+  }).join("");
+  return `<div class="slabs" role="img" aria-label="income by tax slab">${cells}</div>
+    <div class="slabnote">your taxable income, slab by slab — darker = higher rate</div>`;
+}
+
 /* ── compare tile ── */
-function tile(el, title, tag, gross, bd, isWinner, openMath) {
+function tile(el, title, tag, gross, bd, isWinner, slabHTML, openMath) {
   if (!el.dataset.built) {
     el.dataset.built = "1";
     el.innerHTML = `<span class="badge"></span><h3></h3><div class="tag"></div>
@@ -100,7 +136,7 @@ function tile(el, title, tag, gross, bd, isWinner, openMath) {
       <div class="mid"><span data-tax></span> <em>total tax · <span data-rate></span> effective</em></div>
       <div class="bar"><i></i></div>
       <div class="barlabel"><b data-th></b><span data-yr></span></div>
-      <details${openMath ? " open" : ""}><summary>See the math</summary><table></table></details>`;
+      <details${openMath ? " open" : ""}><summary>See the math</summary><div data-slabs></div><table></table></details>`;
   }
   el.querySelector(".badge").textContent = isWinner ? "Best for you" : "";
   el.querySelector("h3").textContent = title;
@@ -119,6 +155,7 @@ function tile(el, title, tag, gross, bd, isWinner, openMath) {
   rows.push(["Cess 4%", "+ " + inr(bd.cess)], ["Total", inr(bd.total)]);
   el.querySelector("table").innerHTML = rows
     .map(([k, v], i) => `<tr${i === rows.length - 1 ? ' class="total"' : ""}><td>${k}</td><td>${v}</td></tr>`).join("");
+  el.querySelector("[data-slabs]").innerHTML = slabHTML || "";
 }
 
 /* ── salaried ── */
@@ -144,8 +181,12 @@ function renderFTE() {
   const diff = Math.abs(nb.total - ob.total);
   $("fte-win").textContent = bestName;
   $("fte-winlabel").textContent = diff >= 1 ? "saves " + inr(diff) + " over the other" : "either regime";
-  tile($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total);
-  tile($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total);
+  tile($("fte-new"), "New regime", "₹75k standard deduction + employer NPS", gross, nb, nb.total <= ob.total, slabStrip(nb.taxable, "new"));
+  tile($("fte-old"), "Old regime", "₹50k standard deduction + your investments", gross, ob, ob.total < nb.total, slabStrip(ob.taxable, "old", $("fte-age").value));
+  splitBars($("fte-split"), [
+    { label: "New regime", gross, tax: nb.total, winner: nb.total <= ob.total },
+    { label: "Old regime", gross, tax: ob.total, winner: ob.total < nb.total },
+  ]);
   markYouRow();
 }
 
@@ -163,13 +204,23 @@ function renderContractor() {
     const adaOld = T.oldRegimeTax(Math.max(0, c.presumptiveIncome - (+$("ct-deductions").value || 0)));
     adaBd = adaNew.total <= adaOld.total ? adaNew : adaOld;
     const rn = adaBd === adaNew ? "new regime" : "old regime + investments";
-    tile(adaEl, "44ADA presumptive", `50% deemed income · ${rn} · ITR-4`, receipts, adaBd, adaBd.total <= regBd.total);
-    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, regBd.total < adaBd.total);
+    tile(adaEl, "44ADA presumptive", `50% deemed income · ${rn} · ITR-4`, receipts, adaBd, adaBd.total <= regBd.total,
+      slabStrip(adaBd.taxable, adaBd === adaNew ? "new" : "old"));
+    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, regBd.total < adaBd.total,
+      slabStrip(regBd.taxable, "new"));
+    splitBars($("ct-split"), [
+      { label: "44ADA presumptive", gross: receipts, tax: adaBd.total, winner: adaBd.total <= regBd.total },
+      { label: "Regular books", gross: receipts, tax: regBd.total, winner: regBd.total < adaBd.total },
+    ]);
   } else {
     delete adaEl.dataset.built;
     adaEl.innerHTML = `<h3>44ADA presumptive</h3><div class="tag">not available at these receipts</div>
       <p class="note" style="margin-top:14px">${inr(receipts)} is past the limit — ₹50L, or ₹75L only when ≥95% of receipts are digital (§58, ITA 2025). Regular books with ITR-3 apply; a tax audit may too.</p>`;
-    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, true);
+    tile(regEl, "Regular books", "receipts − expenses · new regime · ITR-3", receipts, regBd, true,
+      slabStrip(regBd.taxable, "new"));
+    splitBars($("ct-split"), [
+      { label: "Regular books", gross: receipts, tax: regBd.total, winner: true },
+    ]);
   }
 
   const winBd = adaBd && adaBd.total <= regBd.total ? adaBd : regBd;
